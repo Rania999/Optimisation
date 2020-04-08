@@ -1,0 +1,1 @@
+Ceci est le dépôt git contenant le mini-projet d'optimisation réalisé par Pierre Sion et Rania Fathi
