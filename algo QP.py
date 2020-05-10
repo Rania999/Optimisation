@@ -34,11 +34,6 @@ def f(x):
 def grad_f(x):
     return np.dot(A,x) - b 
 
-def find_x0():
-    #trouve x0 tq Cx=d 
-    pass
-
-x0 = np.array([1 for i in range(4)])
 p0 = np.array([1 for i in range(4)])
 
 def minimisation_p(W, p0, x):
