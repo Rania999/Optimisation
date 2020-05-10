@@ -31,8 +31,6 @@ W0= [i for i in range(0,7)]
 def f(x):
     return 0.5 * np.vdot(np.dot(x,A),x) - np.vdot(b,x)
 
-
-
 def grad_f(x):
     return np.dot(A,x) - b 
 
@@ -40,10 +38,13 @@ def find_x0():
     #trouve x0 tq Cx=d 
     pass
 
+x0 = np.array([1 for i in range(4)])
+p0 = np.array([1 for i in range(4)])
+
 def minimisation_p(W, p0, x):
     
     def fct_direction (p):
-        return 0.5* np.vdot(np.dot(p,A),p) + np.vdot(np.dot(A,x)-b, p)
+        return 0.5 * np.vdot(np.dot(p,A),p) + np.vdot(np.dot(A,x)-b, p)
     
     def contraintes(p):
         return np.array([np.vdot(C[i],p) for i in W])
@@ -52,8 +53,8 @@ def minimisation_p(W, p0, x):
         return np.array([C[i] for i in W])
     
     eq_cons_f = {'type': 'eq','fun' : contraintes,'jac' : grad_contraintes}
-    return optimize.minimize(fct_direction, x0, method='SLSQP', jac = grad_f, constraints=[eq_cons_f], options={'ftol': 1e-9, 'disp': True})
     
+    return optimize.minimize(fct_direction, p0, method='SLSQP', jac = grad_f, constraints=[eq_cons_f], options={'ftol': 1e-9, 'disp': True})
     
     
 
@@ -68,7 +69,6 @@ def calcul_alpha(x,p,W):
             j = i 
     return alpha, j 
 
-x0 = find_x0()
 
 def QP(x0, p0, f, grad_f, W = W0):
     x = x0
@@ -87,5 +87,5 @@ def QP(x0, p0, f, grad_f, W = W0):
         if Lambda > 0 :
             return x 
         W.pop(Lambda.index(min(Lambda)))
-        return QP(x, W)
+    return QP(x, W)
                 
