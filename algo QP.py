@@ -5,6 +5,8 @@ Created on Wed May  6 22:17:50 2020
 @author: Rania
 """
 import numpy as np
+from scipy import optimize
+
 
 #ai.T = ième ligne de C, bi = ième coef de d 
 A = np.array([[3.0825,0,0,0],
@@ -29,12 +31,31 @@ W0= [i for i in range(0,7)]
 def f(x):
     return 0.5 * np.vdot(np.dot(x,A),x) - np.vdot(b,x)
 
+
+
 def grad_f(x):
     return np.dot(A,x) - b 
 
 def find_x0():
     #trouve x0 tq Cx=d 
     pass
+
+def minimisation_p(W, p0, x):
+    
+    def fct_direction (p):
+        return 0.5* np.vdot(np.dot(p,A),p) + np.vdot(np.dot(A,x)-b, p)
+    
+    def contraintes(p):
+        return np.array([np.vdot(C[i],p) for i in W])
+    
+    def grad_contraintes(p):
+        return np.array([C[i] for i in W])
+    
+    eq_cons_f = {'type': 'eq','fun' : contraintes,'jac' : grad_contraintes}
+    return optimize.minimize(fct_direction, x0, method='SLSQP', jac = grad_f, constraints=[eq_cons_f], options={'ftol': 1e-9, 'disp': True})
+    
+    
+    
 
 def calcul_alpha(x,p,W):
     I = [i for i in W0  if (i not in W and np.dot(C[i],p)>0)] 
@@ -48,24 +69,23 @@ def calcul_alpha(x,p,W):
     return alpha, j 
 
 x0 = find_x0()
-def QP(x0, W = W0):
-    x = x0
 
-    if "x0 est solution" : 
-        return "x0"
-    else : 
-        p = "resoudre p sol d'un pb de minimisation sous contrainte égalité"
-        if p != 0: 
-            alpha, j = calcul_alpha(x,p,W)
-            x = x + np.dot(alpha, p)
-            if alpha < 1: 
-                W.append(j)
-        elif p == 0 :
-            #Calculer les multiplicateurs de Lagrange :
-            grad_c_w = np.array([C[i] for i in W])
-            Lambda =  np.linalg.solve(-grad_c_w, grad_f(x))
-            if Lambda > 0 :
-                return x 
-            W.pop(Lambda.index(min(Lambda)))
-            return QP(x, W)
+def QP(x0, p0, f, grad_f, W = W0):
+    x = x0
+    p= minimisation_p(W, p0, x)
+    
+    if p != 0: 
+        alpha, j = calcul_alpha(x,p,W)
+        x = x + np.dot(alpha, p)
+        if alpha < 1: 
+            W.append(j)
+            
+    elif p == 0 :
+        
+        grad_c_w = np.array([C[i] for i in W])
+        Lambda =  np.linalg.solve(-grad_c_w, grad_f(x))
+        if Lambda > 0 :
+            return x 
+        W.pop(Lambda.index(min(Lambda)))
+        return QP(x, W)
                 
