@@ -54,7 +54,7 @@ def minimisation_p(W, p0, x):
     
     eq_cons_f = {'type': 'eq','fun' : contraintes,'jac' : grad_contraintes}
     
-    return optimize.minimize(fct_direction, p0, method='SLSQP', jac = grad_f, constraints=[eq_cons_f], options={'ftol': 1e-9, 'disp': True})
+    return optimize.minimize(fct_direction, p0, method='SLSQP', jac = grad_f, constraints=[eq_cons_f], options={'ftol': 1e-9, 'disp': True}).x
     
     
 
@@ -74,18 +74,18 @@ def QP(x0, p0, f, grad_f, W = W0):
     x = x0
     p= minimisation_p(W, p0, x)
     
-    if p != 0: 
+    if not p.all() == 0: 
         alpha, j = calcul_alpha(x,p,W)
         x = x + np.dot(alpha, p)
         if alpha < 1: 
             W.append(j)
             
-    elif p == 0 :
+    else :
         
         grad_c_w = np.array([C[i] for i in W])
         Lambda =  np.linalg.solve(-grad_c_w, grad_f(x))
         if Lambda > 0 :
             return x 
         W.pop(Lambda.index(min(Lambda)))
-    return QP(x, W)
+    return QP(x, p0, f, grad_f, W)
                 
